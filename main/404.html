@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finio — Finance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Particle canvas background -->
+  <canvas id="particleCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.55;"></canvas>
+
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-mark">F</span><span class="logo-text">inio</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="role-switcher">
+        <label class="role-label">Access Role</label>
+        <div class="role-toggle">
+          <button class="role-btn active" data-role="admin" id="roleAdmin">Admin</button>
+          <button class="role-btn" data-role="viewer" id="roleViewer">Viewer</button>
+        </div>
+        <div class="role-badge" id="roleBadge">
+          <span class="badge-dot"></span>
+          <span id="roleText">Admin Access</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#overview" class="nav-item active" data-section="overview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Overview</span>
+        </a>
+        <a href="#transactions" class="nav-item" data-section="transactions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <span>Transactions</span>
+        </a>
+        <a href="#insights" class="nav-item" data-section="insights">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+          <span>Insights</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="period-selector">
+          <label class="role-label">Time Period</label>
+          <select id="periodSelect" class="period-select">
+            <option value="3">Last 3 months</option>
+            <option value="6" selected>Last 6 months</option>
+            <option value="12">Last 12 months</option>
+          </select>
+        </div>
+        <p class="sidebar-version">Finio v2.0 · 2025</p>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <h1 class="page-title" id="pageTitle">Overview</h1>
+            <p class="page-subtitle" id="pageSubtitle">Your financial summary at a glance</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="last-updated">
+            <span class="pulse-dot"></span>
+            <span>Live · <span id="currentDate"></span></span>
+          </div>
+          <button class="export-btn admin-only" id="exportBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- OVERVIEW -->
+      <section class="section active" id="section-overview">
+        <div class="cards-grid">
+          <div class="card card--balance">
+            <div class="card-header">
+              <span class="card-label">Net Balance</span>
+              <div class="card-icon card-icon--balance">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+            </div>
+            <div class="card-value" id="totalBalance">₹0</div>
+            <div class="card-change positive">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18,15 12,9 6,15"/></svg>
+              <span id="balanceChangeTxt">+12.4% from last month</span>
+            </div>
+          </div>
+
+          <div class="card card--income">
+            <div class="card-header">
+              <span class="card-label">Total Income</span>
+              <div class="card-icon card-icon--income">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/><polyline points="17,6 23,6 23,12"/></svg>
+              </div>
+            </div>
+            <div class="card-value" id="totalIncome">₹0</div>
+            <div class="card-change positive">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18,15 12,9 6,15"/></svg>
+              <span>Across selected period</span>
+            </div>
+          </div>
+
+          <div class="card card--expense">
+            <div class="card-header">
+              <span class="card-label">Total Expenses</span>
+              <div class="card-icon card-icon--expense">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,18 13.5,8.5 8.5,13.5 1,6"/><polyline points="17,18 23,18 23,12"/></svg>
+              </div>
+            </div>
+            <div class="card-value" id="totalExpense">₹0</div>
+            <div class="card-change negative">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+              <span>Across selected period</span>
+            </div>
+          </div>
+
+          <div class="card card--savings">
+            <div class="card-header">
+              <span class="card-label">Savings Rate</span>
+              <div class="card-icon card-icon--savings">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>
+              </div>
+            </div>
+            <div class="card-value" id="savingsRate">0%</div>
+            <div class="savings-bar-wrap">
+              <div class="savings-bar"><div class="savings-bar-fill" id="savingsBarFill"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-panel chart-panel--large">
+            <div class="chart-panel-header">
+              <div>
+                <h3 class="chart-title">Balance Trend</h3>
+                <p class="chart-subtitle">Monthly income vs expenses</p>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-item legend-income"><span class="legend-dot"></span>Income</span>
+                <span class="legend-item legend-expense"><span class="legend-dot"></span>Expenses</span>
+              </div>
+            </div>
+            <div style="position:relative;z-index:1;">
+              <canvas id="trendChart" height="220"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-panel chart-panel--small">
+            <div class="chart-panel-header">
+              <div>
+                <h3 class="chart-title">Spending</h3>
+                <p class="chart-subtitle">By category</p>
+              </div>
+            </div>
+            <div style="position:relative;z-index:1;">
+              <canvas id="donutChart" height="190"></canvas>
+            </div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="chart-title">Recent Transactions</h3>
+            <a class="view-all-link" data-section="transactions">View all →</a>
+          </div>
+          <div id="recentTransactions" class="transaction-list"></div>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section class="section" id="section-transactions">
+        <div class="transactions-toolbar">
+          <div class="search-wrap">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search transactions…" />
+          </div>
+          <div class="filters">
+            <select id="filterType" class="filter-select">
+              <option value="">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+            <select id="filterCategory" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+            <select id="sortBy" class="filter-select">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Amount</option>
+              <option value="amount-asc">Lowest Amount</option>
+            </select>
+          </div>
+          <button class="add-btn admin-only" id="addTransactionBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Transaction
+          </button>
+        </div>
+        <div class="transactions-stats" id="transactionStats"></div>
+        <div class="transactions-table-wrap">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th class="text-right">Amount</th>
+                <th class="admin-only text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state hidden">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <p>No transactions found</p>
+            <span>Try adjusting your search or filters</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSIGHTS -->
+      <section class="section" id="section-insights">
+        <div class="insights-grid">
+          <div class="insight-card insight-card--highlight">
+            <div class="insight-icon">🔥</div>
+            <div>
+              <p class="insight-label">Top Spend Category</p>
+              <p class="insight-value" id="topCategory">—</p>
+              <p class="insight-sub" id="topCategoryAmount"></p>
+            </div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">📈</div>
+            <div>
+              <p class="insight-label">Best Savings Month</p>
+              <p class="insight-value" id="bestMonth">—</p>
+              <p class="insight-sub" id="bestMonthAmount"></p>
+            </div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">⚡</div>
+            <div>
+              <p class="insight-label">Avg Monthly Expense</p>
+              <p class="insight-value" id="avgExpense">—</p>
+              <p class="insight-sub">over selected period</p>
+            </div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">💡</div>
+            <div>
+              <p class="insight-label">Expense / Income</p>
+              <p class="insight-value" id="ratioValue">—</p>
+              <p class="insight-sub" id="ratioSub"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="chart-title">Monthly Comparison</h3>
+              <p class="chart-subtitle">Income, Expenses & Net per month</p>
+            </div>
+          </div>
+          <canvas id="comparisonChart" height="260"></canvas>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="chart-title">Category Analysis</h3>
+          </div>
+          <div id="categoryBreakdown" class="category-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Transaction</h3>
+        <button class="modal-close" id="modalClose">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" id="formDesc" class="form-input" placeholder="e.g. Grocery shopping" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input type="number" id="formAmount" class="form-input" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select id="formType" class="form-input">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="formCategory" class="form-input">
+              <option value="Food & Dining">Food & Dining</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Health">Health</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Salary">Salary</option>
+              <option value="Freelance">Freelance</option>
+              <option value="Investment">Investment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" id="formDate" class="form-input" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modalCancel">Cancel</button>
+        <button class="btn-primary" id="modalSave">Save Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
