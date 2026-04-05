@@ -712,8 +712,7 @@
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: false,
         scales: {
           x: {
             ticks: { color: theme.text },
